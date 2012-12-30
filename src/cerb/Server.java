@@ -40,6 +40,7 @@ public class Server extends Object {
 		//Ticket
 		srvTicket.decrypt(myKey);
 		clientName = srvTicket.getClientName();
+		srvAuth.decrypt(srvTicket.getSessionKey());
 		if(srvTicket.getServerName() == myName){
 			//richtiger Server
 			if(timeValid(srvTicket.getStartTime(), srvTicket.getEndTime()) && srvAuth.getClientName() == clientName){
