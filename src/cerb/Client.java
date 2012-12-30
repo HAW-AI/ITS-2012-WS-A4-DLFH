@@ -1,10 +1,10 @@
 package cerb;
 
+import java.util.Arrays;
+
 /* Simulation einer Kerberos-Session mit Zugriff auf einen Fileserver
  /* Client-Klasse
  */
-
-import java.util.*;
 
 public class Client extends Object {
 
@@ -34,17 +34,21 @@ public class Client extends Object {
 		currentUser = userName;
 		long simpleKey = generateSimpleKeyForPassword(password);
 		long nonce = generateNonce();
+		System.out.println("Requesting TGS ticket...");
 		//Anmelden beim KDC und TGS-Ticket holen (requestTGSTicket)
 		TicketResponse response = myKDC.requestTGSTicket(userName, myKDC.getName(), nonce);
 		//TGS-Response entschlüsseln und auswerten
 		if(response.decrypt(simpleKey)){//Schlüssel falsch oder bereits entschlüsselt 
+			System.out.println("TGS ticket received and decrypted");
 			result = true;
 			//TGS-Session key und TGS-Ticket speichern
 			tgsSessionKey = response.getSessionKey();
 			tgsTicket = response.getResponseTicket();
+		} else {
+			System.out.println("TGS ticket received but decryption failed");
 		}
 		//PW im Hauptspeicher löschen
-		password = null;
+		Arrays.fill(password, ' ');
 		return result;
 	}
 
@@ -67,7 +71,7 @@ public class Client extends Object {
 					serverSessionKey = response.getSessionKey();
 					serverTicket = response.getResponseTicket();
 				} else {
-					System.out.println("Server ticket received but decrypting failed");
+					System.out.println("Server ticket received but decryption failed");
 				}
 			} else {
 				System.out.println("TGS ticket not at hand");
@@ -75,6 +79,7 @@ public class Client extends Object {
 			if(serverTicket != null){
 				System.out.println("Requesting service...");
 				Auth auth = new Auth(currentUser,System.currentTimeMillis());
+				auth.encrypt(serverSessionKey);
 				//Service beim Server anfordern (requestService)
 				result =  myFileserver.requestService(serverTicket, auth, "showFile", filePath);
 			} else {
