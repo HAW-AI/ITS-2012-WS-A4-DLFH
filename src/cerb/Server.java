@@ -73,6 +73,7 @@ public class Server extends Object {
 		    	System.out.println(lineBuf);
 		    	lineBuf = inFile.readLine();
 			}
+			inFile.close();
 		} catch (IOException ex) {
 					System.out.println("Fehler beim Lesen der Datei " + filePath + ex);
 					return false;
