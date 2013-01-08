@@ -38,7 +38,7 @@ public class Client extends Object {
 		//Anmelden beim KDC und TGS-Ticket holen (requestTGSTicket)
 		TicketResponse response = myKDC.requestTGSTicket(userName, myKDC.getName(), nonce);
 		//TGS-Response entschlüsseln und auswerten
-		if(response.decrypt(simpleKey)){//Schlüssel falsch oder bereits entschlüsselt 
+		if(response.decrypt(simpleKey) && response.getNonce() == nonce){//Schlüssel falsch oder bereits entschlüsselt 
 			System.out.println("TGS ticket received and decrypted");
 			result = true;
 			//TGS-Session key und TGS-Ticket speichern
@@ -66,7 +66,7 @@ public class Client extends Object {
 				Auth auth = new Auth(currentUser,System.currentTimeMillis());
 				auth.encrypt(tgsSessionKey);
 				TicketResponse response = myKDC.requestServerTicket(tgsTicket, auth, serverName, nonce);
-				if(response.decrypt(tgsSessionKey)){
+				if(response.decrypt(tgsSessionKey) && response.getNonce() == nonce){
 					System.out.println("Server ticket received and decrypted");
 					serverSessionKey = response.getSessionKey();
 					serverTicket = response.getResponseTicket();
@@ -83,7 +83,7 @@ public class Client extends Object {
 				//Service beim Server anfordern (requestService)
 				result =  myFileserver.requestService(serverTicket, auth, "showFile", filePath);
 			} else {
-				System.out.println("Still not server ticket at hand. Can't request service");
+				System.out.println("Still no server ticket at hand. Can't request service");
 			}
 		}
 		return result;

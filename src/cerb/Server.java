@@ -43,7 +43,9 @@ public class Server extends Object {
 		srvAuth.decrypt(srvTicket.getSessionKey());
 		if(srvTicket.getServerName() == myName){
 			//richtiger Server
-			if(timeValid(srvTicket.getStartTime(), srvTicket.getEndTime()) && srvAuth.getClientName() == clientName){
+			if(timeValid(srvTicket.getStartTime(), srvTicket.getEndTime()) 
+					&& srvAuth.getClientName() == clientName
+					&& timeFresh(srvAuth.getCurrentTime())){
 				//noch nicht abgelaufen, Name ok
 				//Befehl ausführen (showFile)
 				if(command == "showFile"){
